@@ -34,9 +34,9 @@ class ImageBoard(var size: Int, var padding: Int) {
     }
 
     def getEnhancementNum(x: Int, y: Int): Int = {
-        val bools = List(getValue(x-1, y-1), getValue(x, y-1), getValue(x+1, y-1), 
-            getValue(x-1, y), getValue(x, y), getValue(x+1, y), 
-            getValue(x-1, y+1), getValue(x, y+1), getValue(x+1, y+1))
+        val bools = List((x-1, y-1), (x, y-1), (x+1, y-1), 
+            (x-1, y), (x, y), (x+1, y), 
+            (x-1, y+1), (x, y+1), (x+1, y+1)).map(t => getValue(t._1, t._2))
 
         bools.foldLeft(0) {(agg, v) => agg * 2 + (if (v) 1 else 0)}
     }
