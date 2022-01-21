@@ -1,31 +1,69 @@
 import scala.io.Source
 
 object Main {
-  def main(args: Array[String]): Unit = {
+    def main(args: Array[String]): Unit = {
     
-    val padding = 5
-    val lines = Source.fromFile("Input.txt").getLines.toList
-    val imageEnhancer = toBoolArray(lines.head)
+        val padding = 5
+        val lines = Source.fromFile("Input.txt").getLines.toList
+        val imageEnhancer = lines.head.map(_ == '#').toList
 
-    var imageArray = toEmptyArrays(110, padding) ++ lines.drop(2).map(toBoolArray(_, 5)) ++ toEmptyArrays(110, padding)
-    
-    println(s"Lines count: ${lines.size}")
+        println(s"Lines count: ${lines.size}")
 
-    println(s"Image enhancer length: ${imageEnhancer.length}")
+        println(s"Image enhancer length: ${imageEnhancer.length}")
 
-    println(s"Image array length: ${imageArray.length}")
-  }
 
-  def toBoolArray(line: String, padding: Int = 0): Array[Boolean] = {
-      val arrayLength = line.length() + 2 * padding
-      var result = Array.fill(arrayLength)(false)
-      
+        var imageBoard = new ImageBoard(100, padding);
+        println(s"Image board total width: ${imageBoard.totalWidth}")
 
-      result
-  }
+        imageBoard.setLines(lines.drop(2))
 
-  def toEmptyArrays(length: Int, numArrays: Int): List[Array[Boolean]] = {
-      val is: IndexedSeq[Array[Boolean]] = (1 to numArrays).map(_ => Array.fill(length)(false))
-      is.toList
-  }
+        imageBoard.print()
+    }
+}
+
+class ImageBoard(var size: Int, var padding: Int) {
+    val totalWidth = size + 2 * padding
+    var imageArray = toEmptyArrays(totalWidth, totalWidth).map(_ => Array.fill(totalWidth)(false)).toArray
+
+    def setValue(v: Boolean, x: Int, y: Int) = {
+        imageArray(toReal(y))(toReal(x)) = v
+    }
+
+    def getValue(x: Int, y: Int): Boolean = {
+        imageArray(toReal(y))(toReal(x))
+    }
+
+    def getEnhancementNum(x: Int, y: Int): Int = {
+        val bools = List(getValue(x-1, y-1), getValue(x, y-1), getValue(x+1, y-1), 
+            getValue(x-1, y), getValue(x, y), getValue(x+1, y), 
+            getValue(x-1, y+1), getValue(x, y+1), getValue(x+1, y+1))
+
+        bools.foldLeft(0) {(agg, v) => agg * 2 + (if (v) 1 else 0)}
+    }
+
+    private def toReal(coord: Int): Int = coord + padding
+
+    def setLines(lines: List[String]) = {
+        var y = 0;
+        for (line <- lines) {
+            var x = 0;
+            for (b <- line.map(_ == '#')) {
+                setValue(b, x, y)
+                x += 1
+            }
+            
+            y += 1
+        }
+    }
+
+    def toEmptyArrays(length: Int, numArrays: Int): List[Array[Boolean]] = {
+        (1 to numArrays).map(_ => Array.fill(length)(false)).toList
+    }
+
+    def print() {
+        for (row <- imageArray) {
+            val symbols = row.map(if (_) '#' else '.').mkString
+                println(symbols)
+        }
+    }
 }
